@@ -1,4 +1,8 @@
 plugins { id 'com.android.application' }
+
+// Numéro de version : augmente à chaque compilation GitHub, pour que la mise à jour s'installe par-dessus.
+def buildNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+
 android {
     namespace 'fr.solitaire.klondike'
     compileSdk 34
@@ -6,9 +10,21 @@ android {
         applicationId 'fr.solitaire.klondike'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode 100 + buildNumber
+        versionName "1." + buildNumber
     }
-    buildTypes { release { minifyEnabled false } }
+    // Signature fixe : toujours la même clé, sinon Android refuse la mise à jour.
+    signingConfigs {
+        release {
+            storeFile file('solitaire.jks')
+            storePassword 'D7wvbxJBIOoKWY-IpoACa9BTfbzjkgaT'
+            keyAlias 'solitaire'
+            keyPassword 'D7wvbxJBIOoKWY-IpoACa9BTfbzjkgaT'
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+        debug { signingConfig signingConfigs.release }
+    }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
